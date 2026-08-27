@@ -1,0 +1,26 @@
+# Run the commands
+#  mv docker-compose.local docker-compose.local.yml
+#  pnpm run docker:local
+# Local-only compose override, not committed (see .gitignore). Not auto-merged
+# by `docker compose` — only docker-compose.override.yml gets that. Use either:
+#   docker compose -f docker-compose.yml -f docker-compose.local.yaml up -d
+# or set once per shell/repo:
+#   export COMPOSE_FILE=docker-compose.yml:docker-compose.local.yaml
+services:
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: always
+    ports:
+      - "8025:8025" # web UI
+      - "1025:1025" # SMTP
+
+  # Points wab's Mailer (see SMTP_HOST/SMTP_PORT in
+  # platform/wab/src/wab/server/emails/Mailer.ts) at mailpit instead of just
+  # console-logging outgoing mail. View sent mail at http://localhost:8025.
+  plasmic-wab:
+    environment:
+      - SMTP_HOST=mailpit
+      - SMTP_PORT=1025
+    depends_on:
+      mailpit:
+        condition: service_started
