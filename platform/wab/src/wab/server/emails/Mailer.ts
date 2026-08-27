@@ -70,6 +70,9 @@ class ConsoleMailer implements Mailer {
 }
 
 export function createMailer(): Mailer {
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = process.env.SMTP_PORT;
+
   if (process.env.NODE_ENV === "production") {
     const resendApiKey = getResendApiKey();
     if (resendApiKey) {
@@ -77,12 +80,24 @@ export function createMailer(): Mailer {
     }
     return new NodeMailer(
       createTransport({
-        host: "email-smtp.us-west-2.amazonaws.com",
-        port: 587,
+        host: smtpHost || "email-smtp.us-west-2.amazonaws.com",
+        port: smtpPort ? Number(smtpPort) : 587,
         auth: getSmtpAuth(),
       })
     );
-  } else {
-    return new ConsoleMailer();
   }
+
+  // e.g. point SMTP_HOST/SMTP_PORT at a local Mailpit container to see real
+  // outgoing mail in dev instead of just console-logging it.
+  if (smtpHost) {
+    return new NodeMailer(
+      createTransport({
+        host: smtpHost,
+        port: smtpPort ? Number(smtpPort) : 587,
+        auth: getSmtpAuth(),
+      })
+    );
+  }
+
+  return new ConsoleMailer();
 }

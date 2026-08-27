@@ -17,6 +17,8 @@
     "db:setup": "cd platform/wab && pnpm db:setup",
     "deps": "lerna list --include-dependencies --scope",
     "dev": "cd platform/wab && pnpm dev",
+    "docker:local": "docker compose -f docker-compose.yml -f docker-compose.local.yaml up -d",
+    "docker:local-build": "docker compose -f docker-compose.yml -f docker-compose.local.yaml build",
     "dev:reset": "pnpm setup && pnpm db:reset && pnpm dev",
     "format": "prettier --write",
     "lint": "eslint --fix",
